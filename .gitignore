@@ -1,0 +1,5 @@
+# binário compilado e bundle do app (gerados pelo build)
+teleprompter
+Teleprompter.app/
+*.o
+.DS_Store

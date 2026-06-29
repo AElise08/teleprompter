@@ -1,0 +1,7 @@
+Cole o seu roteiro aqui neste arquivo (~/teleprompter/script.txt) e reabra o teleprompter.
+
+Esta faixa fica logo abaixo da câmera do seu Mac e NÃO aparece na gravação do Loom nem em prints.
+
+Olhe para a câmera enquanto lê — o texto sobe sozinho.
+
+Espaço pausa e continua. As setas para cima e para baixo mudam a velocidade. Mais e menos mudam o tamanho da letra. R recomeça do início. Q fecha.
