@@ -59,6 +59,15 @@ jobs:
           if ($process.ExitCode -ne 0) {
             throw "Windows GUI smoke test failed with exit code $($process.ExitCode)"
           }
+      - name: Run the complete packaged teleprompter
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath "dist/GhostTeleprompter-Windows.exe" -PassThru
+          Start-Sleep -Seconds 5
+          if ($process.HasExited) {
+            throw "The complete Windows app exited unexpectedly with code $($process.ExitCode)"
+          }
+          Stop-Process -Id $process.Id -Force
       - uses: actions/upload-artifact@v4
         with:
           name: release-windows
