@@ -49,6 +49,11 @@ def run_windows_smoke() -> int:
         root.attributes("-alpha", 0.92)
         root.geometry("560x95+20+20")
         root.update()
+        root.geometry("720x140+20+20")
+        root.update()
+        if root.winfo_width() != 720 or root.winfo_height() != 140:
+            print("windows smoke failed: window did not resize", file=sys.stderr)
+            return 1
         if not _exclude_from_capture(root):
             print("windows smoke failed: capture protection was rejected", file=sys.stderr)
             return 1
@@ -129,15 +134,25 @@ def run_app() -> None:
 
     root.minsize(360, 72)
     root.maxsize(1000, 300)
-    drag = {"mode": "move", "x": 0, "y": 0, "w": WINDOW_W, "h": WINDOW_H}
+    drag = {
+        "mode": "idle",
+        "x": 0,
+        "y": 0,
+        "w": WINDOW_W,
+        "h": WINDOW_H,
+        "resume": False,
+    }
 
     def start_drag(event: tk.Event) -> None:
+        nonlocal playing
         if event.x >= canvas.winfo_width() - 24 and event.y >= canvas.winfo_height() - 24:
             drag["mode"] = "resize"
             drag["x"] = event.x_root
             drag["y"] = event.y_root
             drag["w"] = root.winfo_width()
             drag["h"] = root.winfo_height()
+            drag["resume"] = playing
+            playing = False
             return
         drag["mode"] = "move"
         drag["x"] = event.x_root - root.winfo_x()
@@ -149,10 +164,8 @@ def run_app() -> None:
             height = min(300, max(72, drag["h"] + event.y_root - drag["y"]))
             root.geometry(f"{width}x{height}+{root.winfo_x()}+{root.winfo_y()}")
             return
-        root.geometry(f"+{event.x_root - drag['x']}+{event.y_root - drag['y']}")
-
-    canvas.bind("<ButtonPress-1>", start_drag)
-    canvas.bind("<B1-Motion>", on_drag)
+        if drag["mode"] == "move":
+            root.geometry(f"+{event.x_root - drag['x']}+{event.y_root - drag['y']}")
 
     def max_offset() -> float:
         bbox = canvas.bbox(text_id)
@@ -164,20 +177,37 @@ def run_app() -> None:
     def place_text() -> None:
         canvas.coords(text_id, canvas.winfo_width() / 2, pad - offset)
 
-    def resize_layout(event: tk.Event) -> None:
+    def update_layout(width: int, height: int, reflow: bool) -> None:
         nonlocal pad, offset
-        width = max(1, event.width)
-        height = max(1, event.height)
-        pad = height * 0.45
-        canvas.itemconfigure(text_id, width=max(100, width - 28))
-        offset = min(offset, max_offset())
-        place_text()
+        width = max(1, width)
+        height = max(1, height)
         for index, grip_id in enumerate(grip_ids):
             inset = 5 + index * 5
             canvas.coords(grip_id, width - inset, height - 3, width - 3, height - inset)
         for grip_id in grip_ids:
             canvas.tag_raise(grip_id)
+        if not reflow:
+            place_text()
+            return
+        pad = height * 0.45
+        canvas.itemconfigure(text_id, width=max(100, width - 28))
+        offset = min(offset, max_offset())
+        place_text()
 
+    def resize_layout(event: tk.Event) -> None:
+        update_layout(event.width, event.height, reflow=drag["mode"] != "resize")
+
+    def finish_drag(event: tk.Event) -> None:
+        nonlocal playing
+        was_resizing = drag["mode"] == "resize"
+        drag["mode"] = "idle"
+        if was_resizing:
+            update_layout(canvas.winfo_width(), canvas.winfo_height(), reflow=True)
+            playing = bool(drag["resume"])
+
+    canvas.bind("<ButtonPress-1>", start_drag)
+    canvas.bind("<B1-Motion>", on_drag)
+    canvas.bind("<ButtonRelease-1>", finish_drag)
     canvas.bind("<Configure>", resize_layout)
 
     def apply_text(reset_scroll: bool) -> None:
