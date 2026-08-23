@@ -33,6 +33,31 @@ def run_check() -> int:
     return 0
 
 
+def run_windows_smoke() -> int:
+    """Abre uma janela real e confirma que o Windows aceitou a proteção."""
+    if sys.platform != "win32":
+        print("windows smoke skipped: not Windows")
+        return 0
+
+    import tkinter as tk
+
+    root = tk.Tk()
+    try:
+        root.title("Ghost Teleprompter")
+        root.overrideredirect(True)
+        root.attributes("-topmost", True)
+        root.attributes("-alpha", 0.92)
+        root.geometry("560x95+20+20")
+        root.update()
+        if not _exclude_from_capture(root):
+            print("windows smoke failed: capture protection was rejected", file=sys.stderr)
+            return 1
+        print("windows gui and capture protection ok")
+        return 0
+    finally:
+        root.destroy()
+
+
 def run_app() -> None:
     import tkinter as tk
     from tkinter import font as tkfont
@@ -131,8 +156,7 @@ def run_app() -> None:
     def tick() -> None:
         nonlocal playing, offset, protected
         if not protected:
-            _exclude_from_capture(root)
-            protected = True
+            protected = _exclude_from_capture(root)
         if playing:
             cap = max_offset()
             if cap > 0:
@@ -260,27 +284,38 @@ def _clipboard_sequence() -> int | None:
         return None
 
 
-def _exclude_from_capture(root) -> None:
+def _exclude_from_capture(root) -> bool:
     if sys.platform != "win32":
-        return
+        return True
     import ctypes
+    from ctypes import wintypes
 
     root.update_idletasks()
     user32 = ctypes.windll.user32
-    hwnd = int(root.winfo_id())
-    ancestor = user32.GetAncestor(hwnd, 2)  # GA_ROOT
-    if ancestor:
-        hwnd = ancestor
+    user32.GetAncestor.argtypes = [wintypes.HWND, wintypes.UINT]
+    user32.GetAncestor.restype = wintypes.HWND
+    user32.GetParent.argtypes = [wintypes.HWND]
+    user32.GetParent.restype = wintypes.HWND
+    user32.SetWindowDisplayAffinity.argtypes = [wintypes.HWND, wintypes.DWORD]
+    user32.SetWindowDisplayAffinity.restype = wintypes.BOOL
+
+    widget_hwnd = wintypes.HWND(root.winfo_id())
+    hwnd = user32.GetAncestor(widget_hwnd, 2)  # GA_ROOT
+    if not hwnd:
+        hwnd = widget_hwnd
     WDA_EXCLUDEFROMCAPTURE = 0x00000011
-    if user32.SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE) == 0:
-        parent = user32.GetParent(int(root.winfo_id()))
-        if parent:
-            user32.SetWindowDisplayAffinity(parent, WDA_EXCLUDEFROMCAPTURE)
+    if user32.SetWindowDisplayAffinity(hwnd, WDA_EXCLUDEFROMCAPTURE):
+        return True
+
+    parent = user32.GetParent(widget_hwnd)
+    return bool(parent and user32.SetWindowDisplayAffinity(parent, WDA_EXCLUDEFROMCAPTURE))
 
 
 if __name__ == "__main__":
     if "--check" in sys.argv:
         sys.exit(run_check())
+    if "--windows-smoke" in sys.argv:
+        sys.exit(run_windows_smoke())
     try:
         run_app()
     except ModuleNotFoundError as exc:

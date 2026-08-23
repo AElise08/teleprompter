@@ -1,7 +1,7 @@
 
 <!-- Read this in other languages: [English 🇺🇸](README.md) -->
 
-# Ghost Teleprompter 👻
+# Ghost Teleprompter
 
 **Um teleprompter invisível na sua gravação de tela.**
 

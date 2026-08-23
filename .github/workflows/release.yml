@@ -52,6 +52,13 @@ jobs:
           python teleprompter.py --check
           python -m pip install --disable-pip-version-check pyinstaller
           python -m PyInstaller --noconfirm --onefile --windowed --hidden-import scriptfmt --name GhostTeleprompter-Windows teleprompter.py
+      - name: Open packaged app and verify capture protection
+        shell: pwsh
+        run: |
+          $process = Start-Process -FilePath "dist/GhostTeleprompter-Windows.exe" -ArgumentList "--windows-smoke" -Wait -PassThru
+          if ($process.ExitCode -ne 0) {
+            throw "Windows GUI smoke test failed with exit code $($process.ExitCode)"
+          }
       - uses: actions/upload-artifact@v4
         with:
           name: release-windows

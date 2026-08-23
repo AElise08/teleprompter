@@ -1,6 +1,6 @@
 <!-- Read this in other languages: [Português 🇧🇷](README.pt-BR.md) -->
 
-# Ghost Teleprompter 👻
+# Ghost Teleprompter
 
 **A teleprompter that's invisible to your screen recording.**
 
