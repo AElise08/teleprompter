@@ -155,110 +155,67 @@
       .benefit strong { display: block; margin-bottom: 5px; }
       .benefit span { color: var(--muted); font-size: 0.9rem; line-height: 1.45; }
 
-      .visualization { padding: 0 0 90px; }
+      .product-preview { padding: 0 0 90px; }
 
-      .visualization-heading {
+      .product-preview-heading {
         max-width: 640px;
         margin: 0 auto 28px;
         text-align: center;
       }
 
-      .visualization-heading p {
+      .product-preview-heading p {
         margin: 0;
         color: var(--muted);
         line-height: 1.6;
       }
 
-      .comparison {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 16px;
-      }
-
-      .screen-card {
-        margin: 0;
-        overflow: hidden;
+      .teleprompter-stage {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 54px 20px;
         border: 1px solid var(--line);
         border-radius: 12px;
-        background: var(--white);
+        background: #fafafa;
       }
 
-      .screen-card figcaption {
-        padding: 13px 16px;
-        border-bottom: 1px solid var(--line);
-        font-size: 0.88rem;
-        font-weight: 700;
-      }
-
-      .desktop {
-        position: relative;
-        height: 265px;
+      .teleprompter-window {
+        display: flex;
+        width: min(560px, 100%);
+        height: 95px;
+        margin: 0 auto;
+        align-items: center;
+        justify-content: center;
         overflow: hidden;
-        background: #eceff3;
-      }
-
-      .desktop-window {
-        position: absolute;
-        top: 74px;
-        right: 34px;
-        bottom: 30px;
-        left: 34px;
-        border: 1px solid #d2d6db;
-        border-radius: 8px;
-        background: #ffffff;
-      }
-
-      .desktop-window::before {
-        display: block;
-        height: 25px;
-        border-bottom: 1px solid #e1e3e6;
-        background: #f8f8f8;
-        content: "";
-      }
-
-      .camera-mark {
-        position: absolute;
-        top: 0;
-        left: 50%;
-        width: 64px;
-        height: 13px;
-        transform: translateX(-50%);
-        border-radius: 0 0 8px 8px;
-        background: #252525;
-      }
-
-      .prompt-strip {
-        position: absolute;
-        z-index: 2;
-        top: 25px;
-        left: 50%;
-        width: min(360px, calc(100% - 40px));
-        padding: 13px 18px;
-        transform: translateX(-50%);
-        border-radius: 10px;
+        border-radius: 16px;
         color: #ffffff;
-        background: rgba(18, 18, 18, 0.92);
+        background: rgba(0, 0, 0, 0.82);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.16);
         text-align: center;
-        font-size: 0.92rem;
-        font-weight: 650;
-        line-height: 1.45;
+        font-size: 22px;
+        font-weight: 600;
+        line-height: 1.4;
       }
 
-      .capture .prompt-strip { display: none; }
+      .teleprompter-text {
+        animation: preview-scroll 6s linear infinite;
+      }
 
-      .capture-message {
-        position: absolute;
-        z-index: 2;
-        top: 30px;
-        left: 50%;
-        padding: 8px 11px;
-        transform: translateX(-50%);
-        border: 1px solid #ccd2d9;
-        border-radius: 999px;
+      .teleprompter-text span { display: block; white-space: nowrap; }
+
+      .preview-note {
+        margin: 18px 0 0;
         color: var(--muted);
-        background: rgba(255, 255, 255, 0.9);
-        font-size: 0.76rem;
-        white-space: nowrap;
+        font-size: 0.86rem;
+        text-align: center;
+      }
+
+      @keyframes preview-scroll {
+        0%, 15% { transform: translateY(15px); }
+        85%, 100% { transform: translateY(-15px); }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .teleprompter-text { animation: none; }
       }
 
       .downloads {
@@ -329,10 +286,12 @@
 
       @media (max-width: 780px) {
         .hero { padding: 65px 0 58px; }
-        .benefits, .cards, .comparison { grid-template-columns: 1fr; }
+        .benefits, .cards { grid-template-columns: 1fr; }
         .benefit + .benefit { border-top: 1px solid var(--line); border-left: 0; }
         .card > p { min-height: 0; }
         .verification { grid-template-columns: 1fr; }
+        .teleprompter-window { height: 82px; font-size: 17px; }
+        .teleprompter-text span { white-space: normal; }
         footer { flex-direction: column; }
       }
     </style>
@@ -372,31 +331,20 @@
         </div>
       </section>
 
-      <section class="visualization container" aria-labelledby="visualization-title">
-        <div class="visualization-heading">
-          <h2 id="visualization-title">Como o teleprompter aparece</h2>
-          <p>Você lê a faixa perto da câmera. A proteção do Mac e do Windows pede ao sistema para retirar essa faixa da gravação.</p>
+      <section class="product-preview container" aria-labelledby="preview-title">
+        <div class="product-preview-heading">
+          <h2 id="preview-title">Este é o teleprompter</h2>
+          <p>Uma faixa compacta de 560 × 95 pixels. Ela fica perto da câmera e pode ser arrastada para qualquer posição.</p>
         </div>
 
-        <div class="comparison">
-          <figure class="screen-card">
-            <figcaption>Na sua tela</figcaption>
-            <div class="desktop">
-              <div class="camera-mark"></div>
-              <div class="prompt-strip">Respire e olhe para a câmera.<br>O texto sobe automaticamente.</div>
-              <div class="desktop-window"></div>
+        <div class="teleprompter-stage">
+          <div class="teleprompter-window" aria-label="Visualização da faixa real do teleprompter">
+            <div class="teleprompter-text">
+              <span>Respire e olhe para a câmera.</span>
+              <span>O texto sobe automaticamente.</span>
             </div>
-          </figure>
-
-          <figure class="screen-card capture">
-            <figcaption>Na gravação</figcaption>
-            <div class="desktop">
-              <div class="camera-mark"></div>
-              <div class="prompt-strip">Este texto não entra na gravação.</div>
-              <div class="capture-message">A faixa fica fora da captura</div>
-              <div class="desktop-window"></div>
-            </div>
-          </figure>
+          </div>
+          <p class="preview-note">Representação fiel do tamanho, formato e movimento da faixa.</p>
         </div>
       </section>
 
