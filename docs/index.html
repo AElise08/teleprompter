@@ -184,6 +184,9 @@
       .card h3 { margin: 0 0 9px; font-size: 1.25rem; }
       .card p { min-height: 66px; margin: 0 0 20px; color: var(--muted); line-height: 1.5; }
       .card .button { width: 100%; }
+      .card ol { margin: 22px 0 0; padding-left: 1.2rem; color: var(--muted); line-height: 1.55; }
+      .card li + li { margin-top: 8px; }
+      .card strong { color: var(--ink); }
 
       .limits {
         margin-top: 20px;
@@ -225,10 +228,10 @@
         <h1>Você vê.<br>A gravação não.</h1>
         <p class="lead">Uma faixa discreta que rola seu roteiro perto da câmera. Sem conta, sem cadastro e sem precisar entender GitHub.</p>
         <div class="actions">
-          <a id="smart-download" class="button primary" href="https://github.com/AElise08/teleprompter/releases/latest">Baixar para meu computador</a>
+          <a id="smart-download" class="button primary" href="#downloads">Baixar para meu computador</a>
           <a class="button" href="#downloads">Escolher o sistema</a>
         </div>
-        <p id="smart-note" class="note">O botão identifica Mac, Windows ou Linux automaticamente.</p>
+        <p id="smart-note" class="note">O botão identifica Mac, Windows ou Linux automaticamente e já começa o download do arquivo certo.</p>
 
         <div class="preview" aria-label="Ilustração da faixa do teleprompter abaixo da câmera">
           <div class="camera"></div>
@@ -237,23 +240,38 @@
         </div>
 
         <section id="downloads">
-          <h2>Escolha seu computador</h2>
-          <p class="section-copy">São arquivos prontos. Você não precisa instalar Python, Git ou ferramentas de desenvolvimento.</p>
+          <h2>Baixe e abra</h2>
+          <p class="section-copy">Escolha seu sistema abaixo. O arquivo baixa diretamente — você não precisa procurar nada dentro do GitHub.</p>
           <div class="cards">
             <article class="card">
               <h3>Mac</h3>
-              <p>App nativo original para Macs Intel e Apple Silicon. Abra o DMG e arraste para Aplicativos.</p>
-              <a class="button" href="https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-macOS.dmg">Baixar para Mac</a>
+              <p>App nativo original para Macs Intel e Apple Silicon.</p>
+              <a class="button" href="https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-macOS.dmg">1. Baixar para Mac</a>
+              <ol>
+                <li>Abra <strong>GhostTeleprompter-macOS.dmg</strong> na pasta Downloads.</li>
+                <li>Arraste <strong>Teleprompter</strong> para <strong>Aplicativos</strong>.</li>
+                <li>Abra o app. Se o Mac bloquear, clique com o botão direito no app e escolha <strong>Abrir</strong>.</li>
+              </ol>
             </article>
             <article class="card">
               <h3>Windows</h3>
               <p>Um único arquivo EXE para Windows 10 ou mais recente.</p>
-              <a class="button" href="https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-Windows.exe">Baixar para Windows</a>
+              <a class="button" href="https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-Windows.exe">1. Baixar para Windows</a>
+              <ol>
+                <li>Abra <strong>GhostTeleprompter-Windows.exe</strong> na pasta Downloads.</li>
+                <li>Se o Windows proteger o computador, clique em <strong>Mais informações</strong>.</li>
+                <li>Confira o nome do arquivo e escolha <strong>Executar assim mesmo</strong>.</li>
+              </ol>
             </article>
             <article class="card">
               <h3>Linux</h3>
               <p>Arquivo portátil para Linux x86-64 com ambiente gráfico.</p>
-              <a class="button" href="https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-Linux-x86_64.tar.gz">Baixar para Linux</a>
+              <a class="button" href="https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-Linux-x86_64.tar.gz">1. Baixar para Linux</a>
+              <ol>
+                <li>Extraia <strong>GhostTeleprompter-Linux-x86_64.tar.gz</strong>.</li>
+                <li>Abra as propriedades do arquivo extraído e permita executá-lo como programa.</li>
+                <li>Abra <strong>GhostTeleprompter-Linux-x86_64</strong>.</li>
+              </ol>
             </article>
           </div>
           <div class="limits">
