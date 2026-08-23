@@ -42,7 +42,7 @@ No backend, no web server, no Node, no Electron, no second device.
 
 ## Window & Geometry
 
-- Borderless, always on top, default **560 × 95 px**, centered horizontally, a few pixels below the top of the screen (under notch/camera).
+- Borderless, always on top, default **560 × 95 px**, centered horizontally, a few pixels below the top of the screen (under notch/camera). A subtle bottom-right handle resizes the strip between 360 × 72 and 1000 × 300 px without changing the default.
 - Dark translucent panel; draggable.
 - **macOS:** `sharingType = .none`, `collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]`, `isMovableByWindowBackground = true`.
 - **Windows:** `overrideredirect`, `-topmost`, `SetWindowDisplayAffinity(..., WDA_EXCLUDEFROMCAPTURE)`.

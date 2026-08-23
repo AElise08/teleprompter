@@ -122,6 +122,7 @@ Isso valida o núcleo compartilhado. **Não** abre janela.
 | **0**      | Velocidade padrão             |
 | **Q**      | Fecha                         |
 | arrastar   | Move a faixa                  |
+| canto inferior direito | Redimensiona a faixa   |
 
 
 ## Como o truque funciona

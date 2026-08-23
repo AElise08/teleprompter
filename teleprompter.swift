@@ -6,6 +6,42 @@ final class TPWindow: NSWindow {
     override var canBecomeMain: Bool { true }
 }
 
+// Alça discreta no canto inferior direito para redimensionar a faixa.
+final class ResizeHandleView: NSView {
+    private var startMouse = NSPoint.zero
+    private var startFrame = NSRect.zero
+
+    override func draw(_ dirtyRect: NSRect) {
+        NSColor.white.withAlphaComponent(0.38).setStroke()
+        for offset: CGFloat in [6, 10, 14] {
+            let path = NSBezierPath()
+            path.lineWidth = 1.5
+            path.move(to: NSPoint(x: bounds.maxX - offset, y: 3))
+            path.line(to: NSPoint(x: bounds.maxX - 3, y: offset))
+            path.stroke()
+        }
+    }
+
+    override func mouseDown(with event: NSEvent) {
+        guard let window else { return }
+        startMouse = NSEvent.mouseLocation
+        startFrame = window.frame
+    }
+
+    override func mouseDragged(with event: NSEvent) {
+        guard let window else { return }
+        let mouse = NSEvent.mouseLocation
+        let width = min(1000, max(360, startFrame.width + mouse.x - startMouse.x))
+        let height = min(300, max(72, startFrame.height - (mouse.y - startMouse.y)))
+        let frame = NSRect(
+            x: startFrame.minX,
+            y: startFrame.maxY - height,
+            width: width,
+            height: height)
+        window.setFrame(frame, display: true)
+    }
+}
+
 let DEFAULT_TEXT = """
 Copie o seu roteiro com Cmd+C e reabra: o teleprompter usa o que você copiou.
 Esta faixa fica embaixo da câmera e não aparece na gravação do Loom.
@@ -34,7 +70,7 @@ func loadScript() -> String {
     return DEFAULT_TEXT
 }
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var window: TPWindow!
     var scrollView: NSScrollView!
     var textView: NSTextView!
@@ -69,6 +105,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.sharingType = .none        // <<< invisível pra gravação de tela e prints
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         window.isMovableByWindowBackground = true
+        window.delegate = self
 
         // Fundo arredondado translúcido
         let container = NSView(frame: NSRect(origin: .zero, size: rect.size))
@@ -97,6 +134,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         scrollView.documentView = textView
         container.addSubview(scrollView)
 
+        let resizeHandle = ResizeHandleView(frame: NSRect(x: rect.width - 22, y: 0, width: 22, height: 22))
+        resizeHandle.autoresizingMask = [.minXMargin, .maxYMargin]
+        container.addSubview(resizeHandle)
+
         applyText()
 
         window.makeKeyAndOrderFront(nil)
@@ -117,6 +158,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             self?.watchClipboard()
         }
         RunLoop.main.add(clipTimer!, forMode: .common)
+    }
+
+    func windowDidResize(_ notification: Notification) {
+        relayout()
     }
 
     func watchClipboard() {

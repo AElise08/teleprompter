@@ -120,6 +120,7 @@ That proves the shared formatting/core. It does **not** launch a window.
 | **0** | Reset speed |
 | **Q** | Quit |
 | drag | Move the strip |
+| bottom-right corner | Resize the strip |
 
 ## How the trick works
 

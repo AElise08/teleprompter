@@ -121,13 +121,34 @@ def run_app() -> None:
         justify="center",
     )
 
-    drag = {"x": 0, "y": 0}
+    grip_ids = [
+        canvas.create_line(0, 0, 0, 0, fill="#777777", width=2),
+        canvas.create_line(0, 0, 0, 0, fill="#777777", width=2),
+        canvas.create_line(0, 0, 0, 0, fill="#777777", width=2),
+    ]
+
+    root.minsize(360, 72)
+    root.maxsize(1000, 300)
+    drag = {"mode": "move", "x": 0, "y": 0, "w": WINDOW_W, "h": WINDOW_H}
 
     def start_drag(event: tk.Event) -> None:
+        if event.x >= canvas.winfo_width() - 24 and event.y >= canvas.winfo_height() - 24:
+            drag["mode"] = "resize"
+            drag["x"] = event.x_root
+            drag["y"] = event.y_root
+            drag["w"] = root.winfo_width()
+            drag["h"] = root.winfo_height()
+            return
+        drag["mode"] = "move"
         drag["x"] = event.x_root - root.winfo_x()
         drag["y"] = event.y_root - root.winfo_y()
 
     def on_drag(event: tk.Event) -> None:
+        if drag["mode"] == "resize":
+            width = min(1000, max(360, drag["w"] + event.x_root - drag["x"]))
+            height = min(300, max(72, drag["h"] + event.y_root - drag["y"]))
+            root.geometry(f"{width}x{height}+{root.winfo_x()}+{root.winfo_y()}")
+            return
         root.geometry(f"+{event.x_root - drag['x']}+{event.y_root - drag['y']}")
 
     canvas.bind("<ButtonPress-1>", start_drag)
@@ -138,10 +159,26 @@ def run_app() -> None:
         if not bbox:
             return 0.0
         text_h = bbox[3] - bbox[1]
-        return max(0.0, text_h + pad * 2 - WINDOW_H)
+        return max(0.0, text_h + pad * 2 - max(1, canvas.winfo_height()))
 
     def place_text() -> None:
-        canvas.coords(text_id, WINDOW_W / 2, pad - offset)
+        canvas.coords(text_id, canvas.winfo_width() / 2, pad - offset)
+
+    def resize_layout(event: tk.Event) -> None:
+        nonlocal pad, offset
+        width = max(1, event.width)
+        height = max(1, event.height)
+        pad = height * 0.45
+        canvas.itemconfigure(text_id, width=max(100, width - 28))
+        offset = min(offset, max_offset())
+        place_text()
+        for index, grip_id in enumerate(grip_ids):
+            inset = 5 + index * 5
+            canvas.coords(grip_id, width - inset, height - 3, width - 3, height - inset)
+        for grip_id in grip_ids:
+            canvas.tag_raise(grip_id)
+
+    canvas.bind("<Configure>", resize_layout)
 
     def apply_text(reset_scroll: bool) -> None:
         nonlocal offset
