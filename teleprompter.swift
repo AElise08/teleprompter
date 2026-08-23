@@ -10,6 +10,11 @@ final class TPWindow: NSWindow {
 final class ResizeHandleView: NSView {
     private var startMouse = NSPoint.zero
     private var startFrame = NSRect.zero
+    var onResizeStart: (() -> Void)?
+    var onResizeEnd: (() -> Void)?
+
+    // Impede que o NSWindow interprete o mesmo gesto como movimento da faixa.
+    override var mouseDownCanMoveWindow: Bool { false }
 
     override func draw(_ dirtyRect: NSRect) {
         NSColor.white.withAlphaComponent(0.38).setStroke()
@@ -26,6 +31,7 @@ final class ResizeHandleView: NSView {
         guard let window else { return }
         startMouse = NSEvent.mouseLocation
         startFrame = window.frame
+        onResizeStart?()
     }
 
     override func mouseDragged(with event: NSEvent) {
@@ -39,6 +45,10 @@ final class ResizeHandleView: NSView {
             width: width,
             height: height)
         window.setFrame(frame, display: true)
+    }
+
+    override func mouseUp(with event: NSEvent) {
+        onResizeEnd?()
     }
 }
 
@@ -70,7 +80,7 @@ func loadScript() -> String {
     return DEFAULT_TEXT
 }
 
-final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate {
     var window: TPWindow!
     var scrollView: NSScrollView!
     var textView: NSTextView!
@@ -80,6 +90,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var speed: CGFloat = 0.4      // pixels por tick (~60fps)
     var fontSize: CGFloat = 22
     var playing = true
+    var resumeAfterResize = false
     var rawText = DEFAULT_TEXT
 
     func applicationDidFinishLaunching(_ n: Notification) {
@@ -105,7 +116,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.sharingType = .none        // <<< invisível pra gravação de tela e prints
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         window.isMovableByWindowBackground = true
-        window.delegate = self
 
         // Fundo arredondado translúcido
         let container = NSView(frame: NSRect(origin: .zero, size: rect.size))
@@ -136,6 +146,16 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
 
         let resizeHandle = ResizeHandleView(frame: NSRect(x: rect.width - 22, y: 0, width: 22, height: 22))
         resizeHandle.autoresizingMask = [.minXMargin, .maxYMargin]
+        resizeHandle.onResizeStart = { [weak self] in
+            guard let self else { return }
+            self.resumeAfterResize = self.playing
+            self.playing = false
+        }
+        resizeHandle.onResizeEnd = { [weak self] in
+            guard let self else { return }
+            self.relayout()
+            self.playing = self.resumeAfterResize
+        }
         container.addSubview(resizeHandle)
 
         applyText()
@@ -158,10 +178,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             self?.watchClipboard()
         }
         RunLoop.main.add(clipTimer!, forMode: .common)
-    }
-
-    func windowDidResize(_ notification: Notification) {
-        relayout()
     }
 
     func watchClipboard() {
