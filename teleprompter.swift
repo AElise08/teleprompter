@@ -54,7 +54,7 @@ final class ResizeHandleView: NSView {
 
 let DEFAULT_TEXT = """
 Copie o seu roteiro com Cmd+C e reabra: o teleprompter usa o que você copiou.
-Esta faixa fica embaixo da câmera e não aparece na gravação do Loom.
+Esta faixa fica embaixo da câmera. Faça um teste curto no seu gravador antes de começar.
 Espaço pausa. Setas mudam a velocidade. Mais e menos mudam o tamanho. V recarrega do que você copiou. R recomeça. Q fecha.
 """
 
@@ -113,7 +113,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         window.isOpaque = false
         window.backgroundColor = .clear
         window.hasShadow = false
-        window.sharingType = .none        // <<< invisível pra gravação de tela e prints
+        window.sharingType = .none        // solicita exclusão das capturas compatíveis
         window.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary, .stationary]
         window.isMovableByWindowBackground = true
 

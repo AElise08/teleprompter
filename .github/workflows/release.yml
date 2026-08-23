@@ -1,4 +1,4 @@
-name: Release installers
+name: Release macOS app
 
 on:
   push:
@@ -9,8 +9,8 @@ permissions:
   contents: write
 
 jobs:
-  macos:
-    name: macOS universal app
+  release:
+    name: Build and publish macOS DMG
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v4
@@ -32,89 +32,16 @@ jobs:
           cp -R Teleprompter.app dmg-root/
           ln -s /Applications dmg-root/Applications
           hdiutil create -volname "Ghost Teleprompter" -srcfolder dmg-root -ov -format UDZO GhostTeleprompter-macOS.dmg
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-macos
-          path: GhostTeleprompter-macOS.dmg
-
-  windows:
-    name: Windows executable
-    runs-on: windows-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-      - name: Test and build
-        shell: pwsh
-        run: |
-          python -m unittest discover -s tests -v
-          python teleprompter.py --check
-          python -m pip install --disable-pip-version-check pyinstaller
-          python -m PyInstaller --noconfirm --onefile --windowed --hidden-import scriptfmt --name GhostTeleprompter-Windows teleprompter.py
-      - name: Open packaged app and verify capture protection
-        shell: pwsh
-        run: |
-          $process = Start-Process -FilePath "dist/GhostTeleprompter-Windows.exe" -ArgumentList "--windows-smoke" -Wait -PassThru
-          if ($process.ExitCode -ne 0) {
-            throw "Windows GUI smoke test failed with exit code $($process.ExitCode)"
-          }
-      - name: Run the complete packaged teleprompter
-        shell: pwsh
-        run: |
-          $process = Start-Process -FilePath "dist/GhostTeleprompter-Windows.exe" -PassThru
-          Start-Sleep -Seconds 5
-          if ($process.HasExited) {
-            throw "The complete Windows app exited unexpectedly with code $($process.ExitCode)"
-          }
-          Stop-Process -Id $process.Id -Force
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-windows
-          path: dist/GhostTeleprompter-Windows.exe
-
-  linux:
-    name: Linux executable
-    runs-on: ubuntu-22.04
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install build dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y python3-tk
-          python3 -m pip install --disable-pip-version-check pyinstaller
-      - name: Test and build
-        run: |
-          set -euo pipefail
-          python3 -m unittest discover -s tests -v
-          python3 teleprompter.py --check
-          python3 -m PyInstaller --noconfirm --onefile --windowed --hidden-import scriptfmt --name GhostTeleprompter-Linux-x86_64 teleprompter.py
-          tar -C dist -czf GhostTeleprompter-Linux-x86_64.tar.gz GhostTeleprompter-Linux-x86_64
-      - uses: actions/upload-artifact@v4
-        with:
-          name: release-linux
-          path: GhostTeleprompter-Linux-x86_64.tar.gz
-
-  publish:
-    name: Publish GitHub Release
-    needs: [macos, windows, linux]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/download-artifact@v4
-        with:
-          pattern: release-*
-          path: release-assets
-          merge-multiple: true
-      - name: Create or update release
+      - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           tag="${GITHUB_REF_NAME}"
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
-            gh release upload "$tag" release-assets/* --clobber --repo "$GITHUB_REPOSITORY"
+            gh release upload "$tag" GhostTeleprompter-macOS.dmg --clobber --repo "$GITHUB_REPOSITORY"
           else
-            gh release create "$tag" release-assets/* \
+            gh release create "$tag" GhostTeleprompter-macOS.dmg \
               --repo "$GITHUB_REPOSITORY" \
               --title "Ghost Teleprompter $tag" \
               --generate-notes \

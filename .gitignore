@@ -1,17 +1,5 @@
 # binário compilado e bundle do app (gerados pelo build)
 teleprompter
-teleprompter-swift
 Teleprompter.app/
 *.o
 .DS_Store
-
-# Python
-__pycache__/
-*.pyc
-.venv/
-venv/
-
-# PyInstaller (CI)
-dist/
-build/
-*.spec

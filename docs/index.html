@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Baixe o Ghost Teleprompter para Mac, Windows ou Linux.">
+    <meta name="description" content="Baixe o Ghost Teleprompter para Mac.">
     <title>Ghost Teleprompter — baixar</title>
     <style>
       :root {
@@ -243,7 +243,9 @@
 
       .cards {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        max-width: 560px;
+        margin: 0 auto;
+        grid-template-columns: 1fr;
         gap: 14px;
       }
 
@@ -310,10 +312,10 @@
         <h1>Leia seu roteiro sem tirar os olhos da câmera.</h1>
         <p class="lead">O texto fica em uma faixa discreta perto da lente e rola automaticamente. Você só copia o roteiro e abre o aplicativo.</p>
         <div class="hero-actions">
-          <a id="smart-download" class="button primary" href="#downloads">Baixar para meu computador</a>
-          <a class="button" href="#downloads">Ver todas as versões</a>
+          <a class="button primary" href="https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-macOS.dmg">Baixar para Mac</a>
+          <a class="button" href="#downloads">Como instalar</a>
         </div>
-        <p id="smart-note" class="note">O sistema do seu computador é identificado automaticamente.</p>
+        <p class="note">Aplicativo nativo para Apple Silicon e Intel · macOS 13 ou mais recente.</p>
 
         <div class="benefits">
           <div class="benefit">
@@ -351,7 +353,7 @@
       <section id="downloads" class="downloads">
         <div class="container">
           <div class="section-heading">
-            <h2>Escolha seu sistema</h2>
+            <h2>Baixe para Mac</h2>
             <p>O botão inicia o download direto. Não precisa instalar Python, Git nem ferramentas de desenvolvimento.</p>
           </div>
 
@@ -367,32 +369,11 @@
               </ol>
             </article>
 
-            <article class="card">
-              <h3>Windows</h3>
-              <p>Um arquivo EXE para Windows 10 ou mais recente.</p>
-              <a class="button" href="https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-Windows.exe">Baixar para Windows</a>
-              <ol>
-                <li>Abra o arquivo <strong>.exe</strong> baixado.</li>
-                <li>Se aparecer um aviso, clique em <strong>Mais informações</strong>.</li>
-                <li>Confira o nome do arquivo e escolha <strong>Executar assim mesmo</strong>.</li>
-              </ol>
-            </article>
-
-            <article class="card">
-              <h3>Linux</h3>
-              <p>Arquivo portátil para desktop Linux x86-64.</p>
-              <a class="button" href="https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-Linux-x86_64.tar.gz">Baixar para Linux</a>
-              <ol>
-                <li>Extraia o arquivo <strong>.tar.gz</strong>.</li>
-                <li>Nas propriedades, permita executar o arquivo como programa.</li>
-                <li>Abra <strong>GhostTeleprompter-Linux-x86_64</strong>.</li>
-              </ol>
-            </article>
           </div>
 
           <div class="verification">
             <strong>Sobre a gravação</strong>
-            <p>No Mac e no Windows, o aplicativo usa a proteção de captura oferecida pelo sistema. A versão Windows é construída e aberta automaticamente em um runner Windows a cada atualização. Como gravadores podem usar métodos diferentes, faça uma gravação de cinco segundos antes do primeiro uso importante. No Linux, a faixa pode aparecer na captura.</p>
+            <p>No Mac, a faixa ficou ausente nos testes com captura de tela, gravação nativa e ScreenCaptureKit. Como a Apple classifica esse mecanismo como legado e gravadores podem usar métodos diferentes, faça uma gravação de cinco segundos antes do primeiro uso importante.</p>
           </div>
         </div>
       </section>
@@ -403,34 +384,5 @@
       <a href="https://github.com/AElise08/teleprompter/blob/main/LICENSE">Licença MIT</a>
     </footer>
 
-    <script>
-      const downloads = {
-        mac: {
-          label: "Baixar para Mac",
-          href: "https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-macOS.dmg"
-        },
-        windows: {
-          label: "Baixar para Windows",
-          href: "https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-Windows.exe"
-        },
-        linux: {
-          label: "Baixar para Linux",
-          href: "https://github.com/AElise08/teleprompter/releases/latest/download/GhostTeleprompter-Linux-x86_64.tar.gz"
-        }
-      };
-
-      const platform = (navigator.userAgentData?.platform || navigator.platform || navigator.userAgent).toLowerCase();
-      const os = platform.includes("mac") ? "mac" : platform.includes("win") ? "windows" : platform.includes("linux") ? "linux" : null;
-      const button = document.querySelector("#smart-download");
-      const note = document.querySelector("#smart-note");
-
-      if (os) {
-        button.textContent = downloads[os].label;
-        button.href = downloads[os].href;
-        note.textContent = "Download direto da versão mais recente para o seu sistema.";
-      } else {
-        note.textContent = "Escolha seu sistema logo abaixo.";
-      }
-    </script>
   </body>
 </html>

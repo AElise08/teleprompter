@@ -1,6 +1,6 @@
 Cole o seu roteiro aqui neste arquivo (~/teleprompter/script.txt) e reabra o teleprompter.
 
-Esta faixa fica logo abaixo da câmera do seu Mac e NÃO aparece na gravação do Loom nem em prints.
+Esta faixa fica logo abaixo da câmera do seu Mac. Faça um teste curto no gravador antes de começar.
 
 Olhe para a câmera enquanto lê — o texto sobe sozinho.
 
