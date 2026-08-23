@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  test:
+    name: test (${{ matrix.os }}, py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        python-version: ["3.9", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Unit tests
+        run: python -m unittest discover -s tests -v
+      - name: Headless check
+        run: python teleprompter.py --check
+      - name: Syntax
+        run: python -m py_compile teleprompter.py scriptfmt.py
+
+  macos-native:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile Swift
+        run: swiftc -O teleprompter.swift -o teleprompter-swift
+      - name: Binary exists
+        run: test -x teleprompter-swift
+
+  linux-gui-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Tk and Xvfb
+        run: sudo apt-get update && sudo apt-get install -y python3-tk xvfb
+      - name: Tests with system Python
+        run: python3 -m unittest discover -s tests -v && python3 teleprompter.py --check
+      - name: Launch under Xvfb
+        run: |
+          set +e
+          xvfb-run -a timeout 3 python3 teleprompter.py
+          code=$?
+          set -e
+          # 124 = still running when timeout fired (expected for a GUI loop)
+          if [ "$code" -eq 124 ] || [ "$code" -eq 0 ]; then
+            echo "gui smoke ok"
+            exit 0
+          fi
+          echo "gui exited with $code"
+          exit "$code"
+
+  windows-exe:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: PyInstaller
+        run: |
+          python -m pip install --upgrade pip pyinstaller
+          python -m PyInstaller --noconfirm --onefile --windowed --hidden-import scriptfmt --name GhostTeleprompter teleprompter.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: GhostTeleprompter-windows
+          path: dist/GhostTeleprompter.exe

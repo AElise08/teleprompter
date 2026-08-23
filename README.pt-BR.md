@@ -1,3 +1,4 @@
+
 <!-- Read this in other languages: [English 🇺🇸](README.md) -->
 
 # Ghost Teleprompter 👻
@@ -18,15 +19,29 @@ Ele fica como uma faixa fininha logo abaixo da câmera do Mac, pra você ler olh
 
 ## Por que é diferente
 
-- **Some de verdade da captura.** Usa o `NSWindow.sharingType = .none` do macOS — a mesma flag que gerenciadores de senha usam pra sumir de prints. O gravador simplesmente pula essa janela.
-- **Zero dependências.** Um arquivo Swift, binário de ~150 KB. Sem Node, sem Python, sem navegador, sem Electron. Só as Command Line Tools do Xcode, que você provavelmente já tem.
+- **Some da captura no Mac e no Windows.** macOS usa `NSWindow.sharingType = .none`; Windows usa `WDA_EXCLUDEFROMCAPTURE`. No Linux a faixa roda, mas esconder da gravação não é API portátil.
+- **Sem inchaço.** No Mac é um arquivo Swift (~150 KB). No Windows e no Linux é Python + Tk da biblioteca padrão — ainda sem Node, sem navegador, sem Electron.
 - **Sem editar arquivo.** Copie qualquer texto (`Cmd+C`) de onde quiser — Notas, ChatGPT, um doc — e a faixa troca **sozinha**, uma frase por linha.
 - **Não atrapalha.** Fica embaixo do notch, rola sozinha, sem ícone no Dock, e dá pra arrastar.
 
-## Instalar
+## Baixar e usar
+
+### Não sou desenvolvedor
+
+**[Abra o site de download](https://aelise08.github.io/teleprompter/)** e aperte o botão do seu computador. Há arquivos prontos para Mac, Windows e Linux — não precisa usar GitHub, Git, Python ou terminal.
+
+- **Mac:** baixe o DMG e arraste o Teleprompter para Aplicativos. É o app Swift nativo original, universal para Apple Silicon e Intel.
+- **Windows:** baixe e abra o EXE. Funciona no Windows 10 ou mais recente.
+- **Linux:** baixe o `tar.gz`, extraia e abra o arquivo `GhostTeleprompter-Linux-x86_64` em um desktop Linux x86-64.
+
+Os aplicativos ainda não têm assinatura comercial. O Mac ou o Windows pode mostrar um aviso na primeira abertura; confira que o arquivo veio da [página oficial de releases](https://github.com/AElise08/teleprompter/releases/latest).
+
+### Quero executar pelo código
+
+#### macOS (nativo — some da captura)
 
 ```sh
-git clone git@github.com:AElise08/teleprompter.git
+git clone https://github.com/AElise08/teleprompter.git
 cd teleprompter
 ./build.sh app        # compila e instala o Teleprompter.app em /Applications
 ```
@@ -39,11 +54,56 @@ Sem instalar o app, só rodar:
 ./build.sh
 ```
 
-> Não quer clonar nada? Veja o [`SEED.md`](SEED.md) — cole esse arquivo único em qualquer IA de código (Cursor, Copilot, etc.) e ela gera este app inteiro do zero pra você.
+#### Windows
+
+Instale o [Python 3](https://www.python.org/downloads/) (marque **tcl/tk**). Depois:
+
+```bat
+git clone https://github.com/AElise08/teleprompter.git
+cd teleprompter
+teleprompter.bat
+```
+
+Ou `.\build.ps1`.
+
+No Windows a faixa usa `SetWindowDisplayAffinity(WDA_EXCLUDEFROMCAPTURE)`: Loom/OBS/Win+Shift+S pulam ela, a mesma ideia do Mac.
+
+#### Linux
+
+Precisa de **sessão gráfica** (X11 funciona melhor). VPS sem desktop não mostra a faixa.
+
+```sh
+sudo apt install python3-tk    # Debian/Ubuntu
+# Fedora: sudo dnf install python3-tkinter
+
+git clone https://github.com/AElise08/teleprompter.git
+cd teleprompter
+./build.sh                     # ou: python3 teleprompter.py
+```
+
+No Linux não existe API portátil pra esconder a janela do gravador. A faixa fica por cima e rola; **pode aparecer** na gravação. Use Mac ou Windows quando a invisibilidade importar.
+
+#### VPS Linux (sem tela)
+
+```sh
+python3 teleprompter.py --check
+python3 -m unittest discover -s tests -v
+```
+
+Ou, se a VPS tiver Docker:
+
+```sh
+docker build -t ghost-teleprompter .
+docker run --rm ghost-teleprompter
+```
+
+Isso valida o núcleo compartilhado. **Não** abre janela.
+
+> Quer recriar o projeto com uma IA de código? Veja o [`SEED.md`](SEED.md), a especificação completa do produto.
 
 ## Como usar
 
-1. **Copie** seu roteiro com `Cmd+C` de qualquer lugar.
+1. **Copie** seu roteiro com `Cmd+C` no Mac ou `Ctrl+C` no Windows/Linux.
 2. **Abra** o Ghost Teleprompter — a faixa já mostra seu texto, uma frase por linha.
 3. **Arraste** pra baixo da câmera e grave. Leia olhando pra lente. O texto não vai no vídeo.
 
@@ -51,27 +111,33 @@ Sem instalar o app, só rodar:
 
 ## Controles
 
-| Tecla | Ação |
-|---|---|
-| **Espaço** | Pausa / continua |
-| **↑ / ↓** | Velocidade |
-| **+ / −** | Tamanho da fonte |
-| **V** | Recarrega do que está copiado |
-| **R** | Recomeça do topo |
-| **0** | Velocidade padrão |
-| **Q** | Fecha |
-| arrastar | Move a faixa |
+
+| Tecla      | Ação                          |
+| ---------- | ----------------------------- |
+| **Espaço** | Pausa / continua              |
+| **↑ / ↓**  | Velocidade                    |
+| **+ / −**  | Tamanho da fonte              |
+| **V**      | Recarrega do que está copiado |
+| **R**      | Recomeça do topo              |
+| **0**      | Velocidade padrão             |
+| **Q**      | Fecha                         |
+| arrastar   | Move a faixa                  |
+
 
 ## Como o truque funciona
 
-Toda janela do macOS tem um `sharingType`. Coloque em `.none` e o sistema exclui os pixels dessa janela das APIs de captura e dos prints — mas continua desenhando ela na sua tela física. O Ghost Teleprompter é só uma faixa sem borda, sempre por cima, com essa flag ligada, mais um auto-scroll e um observador da área de transferência. É essa a ideia inteira.
+No **macOS**, a janela tem `sharingType`. Em `.none`, o compositor tira esses pixels das APIs de captura e dos prints — e continua desenhando na tela.
+
+No **Windows**, `SetWindowDisplayAffinity(..., WDA_EXCLUDEFROMCAPTURE)` faz o mesmo.
+
+No **Linux**, os compositors não expõem um equivalente portátil, então a faixa é uma janela normal sempre por cima.
 
 Veja o [`SEED.md`](SEED.md) pra especificação completa.
 
 ## Requisitos
 
-- macOS 13 ou mais novo
-- Xcode Command Line Tools (`xcode-select --install`)
+- **Downloads prontos:** macOS 13+, Windows 10 2004+ ou desktop Linux x86-64
+- **Execução pelo código:** Xcode Command Line Tools no Mac; Python 3.9+ com Tk no Windows/Linux
 
 ## Licença
 
